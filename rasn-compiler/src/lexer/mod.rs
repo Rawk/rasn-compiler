@@ -23,7 +23,7 @@ use crate::intermediate::macros::ToplevelMacroDefinition;
 use crate::lexer::macros::macro_definition;
 use crate::{
     input::{context_boundary, Input},
-    intermediate::{information_object::*, *},
+    intermediate::{information_object::*, types::ObjectIdentifier, *},
 };
 
 use self::{
@@ -56,6 +56,7 @@ mod sequence;
 mod sequence_of;
 mod set;
 mod set_of;
+mod snmp;
 mod time;
 mod util;
 
@@ -172,6 +173,46 @@ pub fn asn1_type(input: Input<'_>) -> ParserResult<'_, ASN1Type> {
             octet_string,
             character_string,
             map(object_class_field_type, ASN1Type::ObjectClassField),
+            map(snmp::module_identity, |_| {
+                // Discard all info for now.
+                ASN1Type::ObjectIdentifier(ObjectIdentifier {
+                    constraints: Vec::new(),
+                })
+            }),
+            map(snmp::textual_convention, |t| {
+                // Discard all info for now, except the type.
+                t.syntax
+            }),
+            map(snmp::object_type, |_| {
+                // Discard all info for now.
+                ASN1Type::ObjectIdentifier(ObjectIdentifier {
+                    constraints: Vec::new(),
+                })
+            }),
+            map(snmp::notification_type, |_| {
+                // Discard all info for now.
+                ASN1Type::ObjectIdentifier(ObjectIdentifier {
+                    constraints: Vec::new(),
+                })
+            }),
+            map(snmp::module_compliance, |_| {
+                // Discard all info for now.
+                ASN1Type::ObjectIdentifier(ObjectIdentifier {
+                    constraints: Vec::new(),
+                })
+            }),
+            map(snmp::object_group, |_| {
+                // Discard all info for now.
+                ASN1Type::ObjectIdentifier(ObjectIdentifier {
+                    constraints: Vec::new(),
+                })
+            }),
+            map(snmp::notification_group, |_| {
+                // Discard all info for now.
+                ASN1Type::ObjectIdentifier(ObjectIdentifier {
+                    constraints: Vec::new(),
+                })
+            }),
             elsewhere_declared_type,
         )),
     ))
