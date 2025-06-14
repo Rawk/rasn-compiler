@@ -20,7 +20,7 @@ use nom::{
 
 use crate::{
     input::{context_boundary, Input},
-    intermediate::{information_object::*, *},
+    intermediate::{information_object::*, types::ObjectIdentifier, *},
 };
 
 use self::{
@@ -52,6 +52,7 @@ mod sequence;
 mod sequence_of;
 mod set;
 mod set_of;
+mod snmp;
 mod time;
 mod util;
 
@@ -161,6 +162,51 @@ pub fn asn1_type(input: Input<'_>) -> ParserResult<'_, ASN1Type> {
             time,
             octet_string,
             character_string,
+            map(snmp::module_identity, |_| {
+                // Throw away all module information for now. The type of a
+                // MODULE-IDENTITY is always OBJECT IDENTIFIER.
+                ASN1Type::ObjectIdentifier(ObjectIdentifier {
+                    constraints: Vec::new(),
+                })
+            }),
+            map(snmp::textual_convention, |t| {
+                // Throw away al ltextual convention info for now. The type is
+                // specified in the MACRO field SYNTAX.
+                t.syntax
+            }),
+            map(snmp::object_type, |o| {
+                // Throw away extra information for now. The type is specified
+                // in the MACRO field SYNTAX.
+                o.syntax
+            }),
+            map(snmp::notification_type, |_| {
+                // Throw away all notification type for now. The type of a info
+                // MODULE-IDENTITY is always OBJECT IDENTIFIER.
+                ASN1Type::ObjectIdentifier(ObjectIdentifier {
+                    constraints: Vec::new(),
+                })
+            }),
+            map(snmp::module_compliance, |_| {
+                // Throw away all module compliance info for now. The
+                // type of a MODULE-IDENTITY is always OBJECT IDENTIFIER.
+                ASN1Type::ObjectIdentifier(ObjectIdentifier {
+                    constraints: Vec::new(),
+                })
+            }),
+            map(snmp::object_group, |_| {
+                // Throw away all object group info for now. The
+                // type of a MODULE-IDENTITY is always OBJECT IDENTIFIER.
+                ASN1Type::ObjectIdentifier(ObjectIdentifier {
+                    constraints: Vec::new(),
+                })
+            }),
+            map(snmp::notification_group, |_| {
+                // Throw away all notification group info for now. The
+                // type of a MODULE-IDENTITY is always OBJECT IDENTIFIER.
+                ASN1Type::ObjectIdentifier(ObjectIdentifier {
+                    constraints: Vec::new(),
+                })
+            }),
             map(information_object_field_reference, |i| {
                 ASN1Type::InformationObjectFieldReference(i)
             }),
@@ -181,7 +227,7 @@ pub fn asn1_value(input: Input<'_>) -> ParserResult<'_, ASN1Value> {
         bit_string_value,
         boolean_value,
         integer_value,
-        character_string_value,
+        map(character_string_value, ASN1Value::String),
         elsewhere_declared_value,
     ))(input)
 }
