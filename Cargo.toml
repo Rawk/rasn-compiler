@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "fuzz",
     "rasn-compiler",
     "rasn-compiler-derive",
     "rasn-compiler-tests",
